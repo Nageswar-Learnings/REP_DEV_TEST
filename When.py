@@ -60,13 +60,20 @@ df.filter(df.name.like("Al%")).show()
 
 # COMMAND ----------
 
+
+
+# COMMAND ----------
+
 data = [(1,'mahe','f',400),(2,'mahe','m',400),(3,'lol','',300)]
 
 schema = ['id','name','gender','salary']
 df = spark.createDataFrame(data,schema)
-df.distinct().show()
-df.select('name','salary').distinct().filter('name = "mahe"').show()
-df.dropDuplicates(('name','salary')).display()
+# df.distinct().show()
+# df.select('name','salary').distinct().filter('name = "mahe"').show()
+# df.dropDuplicates(('name','salary')).display()
+
+df.dtypes[0][1]
+df.columns
 
 # COMMAND ----------
 
@@ -95,11 +102,32 @@ df4 = spark.createDataFrame(data2,schema)
 df3.show()
 df4.show()
 
-final_df = df3.union(df4).show()
+final_df = df3.union(df4).distinct()
+final_df.show()
 
 # COMMAND ----------
 
-help(df3.union)
+
+from pyspark.sql.functions import col
+final_df.select('*').show()
+final_df.select('id','name').show()
+final_df.select(['id','name']).show()
+final_df.select(final_df['id']).show()
+final_df.select(col('id')).show()
+final_df.select(('id')).show()
+
+# COMMAND ----------
+
+df3.show()
+df4.show()
+join_df = df3.join(df4,['id','name'],'left').show()
+join_df = df3.join(df4,df3.id==df4.id).show()
+join_df = df3.join(df4,['id']).show()
+df3.join(df4, "name", "right_outer").show()
+df3.join(df4, "name", "leftanti").show()
+data = [(1,'Nag',0),(2,'Rao',1),(3,'Bhuma',)]
+schema = ['id','name','ManagerId']
+
 
 # COMMAND ----------
 
@@ -107,17 +135,147 @@ help(df3.union)
 
 # COMMAND ----------
 
-df1
-df2
+from pyspark.sql.functions import col,when
+data = [(1,'Nag',0),(2,'Rao',1),(3,'Bhuma',2)]
+schema = ['id','name','ManagerId']
+df = spark.createDataFrame(data,schema)
+df.alias('EmpData').join(df.alias('MangerData'),col('EmpData.id')==col('MangerData.ManagerId'),'full')\
+    .select(when (col('EmpData.name').alias('Emp_Name').isNull(),'PRESIDENT').otherwise(col('EmpData.name')).alias('Emp_Name')\
+        ,col('MangerData.name').alias('Manager_Name')).show()
 
-df3= df1.join(df2,df2.Id=df1.Id and df2.Loc=df1.Loc,'')
 
 # COMMAND ----------
 
-from pyspark.sql.functions import *
+df=spark.read.csv('dbfs:/mnt/blobstorage/test/employees.csv',header=True)
+
+# COMMAND ----------
+
+df.show()
+
+# COMMAND ----------
+
+df.groupBy('DEPARTMENT_ID').pivot('JOB_ID',['IT_PROG']).count().show()
+
+# COMMAND ----------
+
+from pyspark.sql.functions import expr
+data = [('IT',2,4),('PAYROLL',3,6),('HR',3,6)]
+schema = ['Department','male','female']
+df = spark.createDataFrame(data,schema)
+df= df.select('Department', expr("stack(2,'m',male,'f',female) as (gender,count)"))
+df.show()
+df= df.select('Department', expr("length(Department)"))
+df.show()
+
+
+
+# COMMAND ----------
+
+data = [(1,'nag',None),(None,'kesav','rct'),(2,None,'kdp')]
+schema = ['id','name','address']
+df = spark.createDataFrame(data,schema)
+df.show()
+df.fillna(1999,['id']).show()
+df.fillna('unknown',['name']).show()
+df.na.fill('unknown',['address']).show()
+
+# COMMAND ----------
+
+data = [(1,'nag',None),(None,'kesav','rct'),(2,None,'kdp')]
+schema = ['id','name','address']
+df = spark.createDataFrame(data,schema)
+df.show()
+df1=df.collect()
+print(df1[0][2])
+print(df1[2][2])
+print(df[2])
+
+# COMMAND ----------
+
+from pyspark.sql.functions import upper
+df.show()
+def ConvertUppper(df):
+    return df.withColumn('name',upper('name'))
+def MutiplyId(df):
+    return df.withColumn('id',df.id*2)
+df1 = df.transform(ConvertUppper)
+df2 = df.transform(MutiplyId)
+final_df = df.transform(ConvertUppper).transform(MutiplyId)
+df1.show()
+df2.show()
+final_df.show()
+print(df.columns)
+
+# COMMAND ----------
+
+help(df.transform)
+
+# COMMAND ----------
+
+from pyspark.sql.functions import transform
+data = [(1,['nag','hari'],None),(None,['kesav,''chinna'],'rct'),(2,['king'],'kdp')]
+schema = ['id','name','address']
+df = spark.createDataFrame(data,schema)
+df.show()
+df.printSchema()
+df.select('id',transform('name',lambda x : upper(x)).alias('UpperName')).show()
+
+def ConvertUppperf(x):
+    return upper(x)
+
+df1 =df.select('id',transform('name',ConvertUppperf).alias('Uppder'))
+df1.show()
+# > from pyspark.sql.functions import col
+#     >>> df = spark.createDataFrame([(1, 1.0), (2, 2.0)], ["int", "float"])
+#     >>> def cast_all_to_int(input_df):
+#     ...     return input_df.select([col(col_name).cast("int") for col_name in input_df.columns])
+
+
+# COMMAND ----------
+
+df.show()
+df.createOrReplaceTempView('employeeTemp')
+df1 = spark.sql("select name from employeeTemp")
+df1.show()
+
+# COMMAND ----------
+
+# MAGIC %scala
+# MAGIC spark
+
+# COMMAND ----------
+
+df.createOrReplaceGlobalTempView('employeeGobal')
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC select * from employee
+
+# COMMAND ----------
+
+#spark.catalog.listTables('global_temp')
+#spark.catalog.dropTempView('employee')
+spark.catalog.dropGlobalTempView('global_temp')
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+
+
+# COMMAND ----------
+
+from pyspark.sql.functions import * 
 df3.withColumn('NewDate',current_timestamp().cast('date')).show()
                #to_date(current_timestamp())).show()
 
 # COMMAND ----------
 
+help(df.transform)
 
+# COMMAND ----------
+
+df.show()
