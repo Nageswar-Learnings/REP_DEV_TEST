@@ -1,0 +1,19 @@
+{
+	"name": "inputDataSet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureDataLakeStorageNagTest",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "Nag.txt",
+				"folderPath": "testfiles",
+				"fileSystem": "nagcontainer"
+			}
+		}
+	}
+}
