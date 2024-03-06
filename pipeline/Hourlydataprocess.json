@@ -1,0 +1,9 @@
+{
+	"name": "Hourlydataprocess",
+	"properties": {
+		"folder": {
+			"name": "ADF-TEST"
+		},
+		"annotations": []
+	}
+}
