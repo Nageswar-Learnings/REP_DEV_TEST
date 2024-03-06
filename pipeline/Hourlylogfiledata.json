@@ -1,0 +1,9 @@
+{
+	"name": "Hourlylogfiledata",
+	"properties": {
+		"folder": {
+			"name": "ADF-TEST"
+		},
+		"annotations": []
+	}
+}
