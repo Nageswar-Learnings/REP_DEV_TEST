@@ -1,0 +1,20 @@
+{
+	"name": "selftumpling",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"type": "TumblingWindowTrigger",
+		"typeProperties": {
+			"frequency": "Minute",
+			"interval": 15,
+			"startTime": "2024-03-01T11:00:00Z",
+			"endTime": "2024-03-31T11:00:00Z",
+			"delay": "00:00:00",
+			"maxConcurrency": 50,
+			"retryPolicy": {
+				"intervalInSeconds": 30
+			},
+			"dependsOn": []
+		}
+	}
+}
