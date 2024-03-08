@@ -9,12 +9,6 @@
 					"referenceName": "CopyPipeline",
 					"type": "PipelineReference"
 				}
-			},
-			{
-				"pipelineReference": {
-					"referenceName": "Hourlylogfiledata",
-					"type": "PipelineReference"
-				}
 			}
 		],
 		"type": "ScheduleTrigger",
